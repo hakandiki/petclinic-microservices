@@ -3,7 +3,7 @@ pipeline {
     environment {
         PATH=sh(script:"echo $PATH:/usr/local/bin", returnStdout:true).trim()
         APP_NAME="petclinic"
-        APP_STACK_NAME="Call-${APP_NAME}-app-${BUILD_NUMBER}"
+        APP_STACK_NAME="hakan-${APP_NAME}-app-${BUILD_NUMBER}"
         APP_REPO_NAME="clarusway-repo/${APP_NAME}-app-dev"
         AWS_ACCOUNT_ID=sh(script:'export PATH="$PATH:/usr/local/bin" && aws sts get-caller-identity --query Account --output text', returnStdout:true).trim()
         AWS_REGION="us-east-1"
@@ -181,33 +181,3 @@ pipeline {
         }
     }
 }
-Create a Jenkins pipeline with name of petclinic-nightly with following script to run QA automation tests and configure a cron job to trigger the pipeline every night at midnight (0 0 * * *) on dev branch. Petclinic nightly build pipeline should be built on temporary QA automation environment.
-
-Commit the change, then push the script to the remote repo.
-
-git add .
-git commit -m 'added qa automation pipeline for dev'
-git push
-git checkout dev
-git merge feature/msp-17
-git push origin dev
-MSP 18 - Create a QA Environment on Docker Swarm with Cloudformation and Ansible
-Create feature/msp-18 branch from dev.
-git checkout dev
-git branch feature/msp-18
-git checkout feature/msp-18
-Prepare a Cloudformation template for QA Docker Swarm Infrastructure consisting of 3 Managers, 2 Worker Instances and save it as qa-docker-swarm-infrastructure-cfn-template.yml under infrastructure folder.
-
-Grant permissions to Docker Machines within Cloudformation template to create ECR Registry, push or pull Docker images to/from ECR Repo.
-
-Create a Jenkins Job with the name of create-permanent-key-pair-for-petclinic-qa-env for Ansible key pair to be used in QA environment using following script, and save the script as create-permanent-key-pair-for-qa-environment.sh under jenkins folder.
-
-PATH="$PATH:/usr/local/bin"
-APP_NAME="petclinic"
-CFN_KEYPAIR="matt-${APP_NAME}-qa.key"
-AWS_REGION="us-east-1"
-aws ec2 create-key-pair --region ${AWS_REGION} --key-name ${CFN_KEYPAIR} --query "KeyMaterial" --output text > ${CFN_KEYPAIR}
-chmod 400 ${CFN_KEYPAIR}
-mkdir -p ${JENKINS_HOME}/.ssh
-mv ${CFN_KEYPAIR} ${JENKINS_HOME}/.ssh/${CFN_KEYPAIR}
-ls -al ${JENKINS_HOME}/.ssh
